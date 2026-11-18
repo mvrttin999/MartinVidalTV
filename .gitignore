@@ -7,3 +7,4 @@ capturas/
 .tools-venv/
 *.jks
 .kotlin/
+__pycache__/
