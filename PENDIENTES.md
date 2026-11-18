@@ -487,3 +487,30 @@ Entrega actual: `MartinVidalTV-1.0.0.apk`, 3.523.397 bytes, SHA-256
 `e256e658783e84eb84f5945e2c23678e4fb97db13d243480b23b75e1f70fcec9`, con la URL
 de actualización visible dentro del DEX. `update.json` apunta al APK del repo y
 lleva ese mismo SHA. La firma v1/v2 se verificó con `apksigner verify`.
+
+
+### v1.1.0 — nombres y categorías (2026-11-18)
+
+El catálogo seguía intacto en `lista.m3u` (678 canales, 506 licencias), pero los
+678 entradas compartían `group-title="Xuper LIVE"`, de modo que "En directo"
+mostraba una única estantería gigante. Además, 98 títulos salieron corruptos del
+heap de Xuper (`free`, `90x60`, `cyx_…`, `@Po`, `T^h`, …).
+
+Cambios:
+
+- `tools/rebuild_playlist.py`: repara los títulos recuperables (códigos legibles,
+  `24/7 Hulk (1996)`, `24/7 Spiderman (1997)`) y sustituye los 85 restantes por
+  `Canal Xuper <sufijo>`; reparte los 678 canales en 10 categorías y conserva
+  las 678 URLs y sus licencias sin cambios. El script queda versionado para
+  poder regenerar la M3U.
+- Categorías resultantes: Canales locales 129, Deportes 100, Series 80,
+  Películas 68, Otros canales 67 (incluye los 85 nombres genéricos),
+  Entretenimiento 47, Infantil 45, Documentales 30, Noticias 18, Música 9.
+- `HomeActivity`: la rail añade "Deportes" y "Noticias" y "En directo" vuelve al
+  inicio de las estanterías. `strings.xml`: aviso actualizado.
+- Verificado en emulador: la portada muestra las estanterías Deportes,
+  Películas, Series, … y al pulsar "Noticias" la lista salta a esa categoría.
+
+Entrega: `MartinVidalTV-1.1.0.apk`, 3524895 bytes, SHA-256 `78bbe71438ad1dbf2e5ccbfb70571bd4a0404eea17f73e38a027e0e72c561a3a`, versionCode 2.
+`update.json` apunta a ese APK con el mismo SHA, así que una instalación con
+v1.0.0 recibe la actualización automáticamente.

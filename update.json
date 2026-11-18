@@ -1,7 +1,7 @@
 {
-  "versionCode": 1,
-  "versionName": "1.0.0",
-  "apkUrl": "https://raw.githubusercontent.com/mvrttin999/MartinVidalTV/main/MartinVidalTV-1.0.0.apk",
-  "sha256": "e256e658783e84eb84f5945e2c23678e4fb97db13d243480b23b75e1f70fcec9",
-  "notes": "Catalogo Xuper LIVE integrado (678 canales) con inyeccion de cabeceras."
+  "versionCode": 2,
+  "versionName": "1.1.0",
+  "apkUrl": "https://raw.githubusercontent.com/mvrttin999/MartinVidalTV/main/MartinVidalTV-1.1.0.apk",
+  "sha256": "78bbe71438ad1dbf2e5ccbfb70571bd4a0404eea17f73e38a027e0e72c561a3a",
+  "notes": "Nombres de canales reparados y catalogo dividido en 10 categorias."
 }

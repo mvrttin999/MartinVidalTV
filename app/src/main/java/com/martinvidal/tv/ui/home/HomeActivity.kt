@@ -31,10 +31,12 @@ class HomeActivity : BaseActivity() {
 
         val sections = listOf(
             Section("live", getString(R.string.home_live)),
+            Section("sports", getString(R.string.home_sports)),
             Section("movies", getString(R.string.home_movies)),
             Section("series", getString(R.string.home_series)),
             Section("kids", getString(R.string.home_kids)),
             Section("docs", getString(R.string.home_docs)),
+            Section("news", getString(R.string.home_news)),
             Section("search", getString(R.string.home_search)),
             Section("settings", getString(R.string.home_settings))
         )
@@ -93,6 +95,11 @@ class HomeActivity : BaseActivity() {
     private fun scrollToSection(section: Section) {
         val shelves = viewModel.state.value.shelves
         if (shelves.isEmpty()) return
+        if (section.id == "live") {
+            (binding.shelves.layoutManager as? LinearLayoutManager)
+                ?.scrollToPositionWithOffset(0, 0)
+            return
+        }
         val index = shelves.indexOfFirst { it.id == section.id }
             .takeIf { it >= 0 }
             ?: shelves.indexOfFirst { it.title.equals(section.title, ignoreCase = true) }

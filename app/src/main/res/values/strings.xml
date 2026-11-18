@@ -5,15 +5,17 @@
     <string name="common_back">Volver</string>
 
     <string name="home_live">En directo</string>
+    <string name="home_sports">Deportes</string>
     <string name="home_movies">Películas</string>
     <string name="home_series">Series</string>
     <string name="home_kids">Infantil</string>
     <string name="home_docs">Documentales</string>
+    <string name="home_news">Noticias</string>
     <string name="home_search">Buscar</string>
     <string name="home_settings">Ajustes</string>
     <string name="home_demo_notice">Contenido de ejemplo. Configura el portal o una lista M3U en Ajustes.</string>
     <string name="home_demo_user">Invitado</string>
-    <string name="home_bundled_notice">Catálogo Xuper LIVE incluido (678 canales). Pega un Content-Auth fresco en Ajustes para abrir los directos.</string>
+    <string name="home_bundled_notice">Catálogo Xuper LIVE: 678 canales en 10 categorías. Pega un Content-Auth fresco en Ajustes para abrir los directos.</string>
 
     <string name="detail_play">Reproducir</string>
     <string name="detail_play_loading">Abriendo…</string>

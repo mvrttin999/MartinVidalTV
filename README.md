@@ -194,7 +194,7 @@ https://raw.githubusercontent.com/mvrttin999/MartinVidalTV/main/update.json
 ```
 
 El `update.json` de la raíz del repo apunta al APK
-`MartinVidalTV-1.0.0.apk` publicado en el mismo repo; la app compara
+`MartinVidalTV-1.1.0.apk` publicado en el mismo repo; la app compara
 `versionCode`, descarga por HTTPS y valida el SHA-256 antes de ofrecer la
 instalación. El repositorio es público para que `raw.githubusercontent.com`
 sirva ambos archivos sin autenticación.
@@ -272,14 +272,14 @@ host guardado en `SettingsStore`.
 
 | Dato | Valor |
 |---|---|
-| APK | `MartinVidalTV-1.0.0.apk` |
+| APK | `MartinVidalTV-1.1.0.apk` |
 | Paquete | `com.martinvidal.tv` |
-| Versión | `1.0.0` (versionCode 1), `minSdk 21`, `targetSdk 34` |
-| Tamaño | 3.523.397 bytes (3,4 MiB) |
+| Versión | `1.1.0` (versionCode 2), `minSdk 21`, `targetSdk 34` |
+| Tamaño | 3524895 bytes (3.4 MiB) |
 | Firma | `CN=Martin Vidal, O=Martin Vidal TV, C=BR` (`martinvidal.jks`) |
-| SHA-256 del APK | `e256e658783e84eb84f5945e2c23678e4fb97db13d243480b23b75e1f70fcec9` |
+| SHA-256 del APK | `78bbe71438ad1dbf2e5ccbfb70571bd4a0404eea17f73e38a027e0e72c561a3a` |
 | SHA-256 del certificado | `3192796cd3cd3eac7281412ae6be4cbd584da36fbe4479af1c5427e6c8df23f1` |
 
-Instalación: `adb install -r MartinVidalTV-1.0.0.apk`. Para actualizar sin
+Instalación: `adb install -r MartinVidalTV-1.1.0.apk`. Para actualizar sin
 perder la firma hay que conservar `martinvidal.jks` y `keystore.properties`
 (no versionados).
