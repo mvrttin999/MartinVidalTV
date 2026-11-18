@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Martin Vidal TV</string>
+    <string name="welcome_loading">Cargando…</string>
+    <string name="common_back">Volver</string>
+
+    <string name="home_live">En directo</string>
+    <string name="home_movies">Películas</string>
+    <string name="home_series">Series</string>
+    <string name="home_kids">Infantil</string>
+    <string name="home_docs">Documentales</string>
+    <string name="home_search">Buscar</string>
+    <string name="home_settings">Ajustes</string>
+    <string name="home_demo_notice">Contenido de ejemplo. Configura el portal o una lista M3U en Ajustes.</string>
+    <string name="home_demo_user">Invitado</string>
+    <string name="home_bundled_notice">Catálogo Xuper LIVE incluido (678 canales). Pega un Content-Auth fresco en Ajustes para abrir los directos.</string>
+
+    <string name="detail_play">Reproducir</string>
+    <string name="detail_play_loading">Abriendo…</string>
+    <string name="detail_back">Volver</string>
+
+    <string name="search_title">Buscar</string>
+    <string name="search_hint">Título, serie o canal</string>
+    <string name="search_action">Buscar</string>
+    <string name="search_empty">Escribe un título y pulsa Buscar.</string>
+    <string name="search_no_results">Sin resultados.</string>
+
+    <string name="player_error">No se pudo reproducir el contenido (%1$s).</string>
+    <string name="player_error_source">El canal no responde ahora mismo. Puede estar caído.</string>
+    <string name="player_error_network">Sin conexión con el canal. Revisa tu internet e inténtalo de nuevo.</string>
+    <string name="player_error_format">El formato de este canal no es compatible con la app.</string>
+    <string name="player_error_codec">Este equipo no puede decodificar el canal.</string>
+    <string name="player_retry">Reintentar</string>
+
+    <string name="portal_title">Fuente de contenido</string>
+    <string name="portal_help">Portal del distribuidor y/o lista M3U propia. Se guarda en este equipo. No hay cuenta ni activación.</string>
+    <string name="portal_host">Host del portal</string>
+    <string name="portal_host_hint">https://portal.ejemplo.com</string>
+    <string name="portal_code">Código de portal</string>
+    <string name="portal_code_hint">portalCode que entrega el distribuidor</string>
+    <string name="portal_appid">Identificador de app (appId)</string>
+    <string name="portal_appid_hint">com.android.msandroid</string>
+    <string name="portal_save">Guardar</string>
+    <string name="portal_cancel">Cancelar</string>
+    <string name="portal_playlist">Lista M3U propia (opcional)</string>
+    <string name="portal_playlist_help">Si la tienes, la app usa esta lista en vez de la incluida. Si la dejas vacía, usa el catálogo Xuper LIVE (678 canales).</string>
+    <string name="portal_playlist_hint">https://ejemplo.com/lista.m3u</string>
+    <string name="portal_xuper_auth">Content-Auth de los directos (opcional)</string>
+    <string name="portal_xuper_auth_help">Valor Content-Auth capturado de la app original. Caduca en minutos; pega uno nuevo cuando los canales dejen de abrir. Vacío usa el incluido.</string>
+    <string name="portal_xuper_auth_hint">/live/?user_id=...&amp;sign2=...</string>
+    <string name="portal_update">URL del manifiesto de actualizaciones (opcional)</string>
+    <string name="portal_update_help">JSON con versionCode, versionName, apkUrl, sha256 y notes. Se comprueba periódicamente y se descarga sola; en release solo se acepta HTTPS.</string>
+    <string name="portal_update_hint">https://ejemplo.com/update.json</string>
+    <string name="portal_error_host">Escribe un host válido, por ejemplo portal.ejemplo.com</string>
+    <string name="portal_updates">Actualizaciones</string>
+    <string name="portal_version">Versión instalada</string>
+
+    <string name="update_title">Actualizaciones</string>
+    <string name="update_current">Versión instalada</string>
+    <string name="update_source">Fuente del manifiesto</string>
+    <string name="update_status">Estado</string>
+    <string name="update_check">Buscar ahora</string>
+    <string name="update_install">Instalar</string>
+    <string name="update_checking">Comprobando…</string>
+    <string name="update_done">Comprobación terminada.</string>
+    <string name="update_failed">No se pudo comprobar la actualización.</string>
+    <string name="update_no_source">Sin configurar (desactivado)</string>
+    <string name="update_none">No hay actualizaciones descargadas.</string>
+    <string name="update_ready_version">Versión %1$s descargada y verificada. Pulsa Instalar.</string>
+    <string name="update_not_ready">No hay una actualización descargada.</string>
+    <string name="update_allow_unknown">Activa \"Instalar apps desconocidas\" para esta app en Ajustes del sistema.</string>
+    <string name="update_install_error">No se pudo abrir el instalador del sistema.</string>
+    <string name="update_channel">Actualizaciones</string>
+    <string name="update_channel_desc">Aviso de actualización descargada</string>
+    <string name="update_notify_title">Actualización lista</string>
+    <string name="update_notify_text">Ya está descargada la versión %1$s. Pulsa para instalar.</string>
+</resources>

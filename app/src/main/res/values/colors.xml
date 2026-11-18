@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paleta de marca. Cambiar aqui para re-marcar toda la app. -->
+    <color name="brand_primary">#FFAA00</color>
+    <color name="brand_primary_dark">#CC8800</color>
+    <color name="brand_accent">#FFFFFF</color>
+    <color name="on_brand">#101010</color>
+
+    <color name="background">#0B0B0B</color>
+    <color name="surface">#171717</color>
+    <color name="surface_focused">#262626</color>
+    <color name="divider">#2E2E2E</color>
+
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#C4C4C4</color>
+    <color name="text_hint">#8C9194</color>
+    <color name="text_disabled">#606060</color>
+</resources>
