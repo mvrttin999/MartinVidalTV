@@ -52,12 +52,9 @@ object NetworkModule {
                 HttpLoggingInterceptor.Level.NONE
             }
         }
-        val bundledAuth = runCatching {
-            context.assets.open("xuper_auth.txt").bufferedReader().use { it.readText() }
-        }.getOrDefault("")
         return OkHttpClient.Builder()
             .addInterceptor(PortalInterceptor(session, device))
-            .addInterceptor(XuperAuthInterceptor(session, bundledAuth))
+            .addInterceptor(XuperAuthInterceptor())
             .addInterceptor(logging)
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

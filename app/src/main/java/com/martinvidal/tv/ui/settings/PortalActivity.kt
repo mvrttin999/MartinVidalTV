@@ -65,7 +65,6 @@ class PortalActivity : BaseActivity() {
             binding.portalCode.setText(state.portalCode)
             binding.appId.setText(state.appId.ifBlank { device.appId })
             binding.playlist.setText(state.playlistUrl)
-            binding.xuperAuth.setText(state.xuperAuth)
             binding.updateUrl.setText(
                 state.updateUrl.ifBlank { BuildConfig.UPDATE_URL }
             )
@@ -83,7 +82,6 @@ class PortalActivity : BaseActivity() {
         val portalCode = binding.portalCode.text.toString().trim()
         val appId = binding.appId.text.toString().trim().ifBlank { device.appId }
         val rawPlaylist = binding.playlist.text.toString().trim()
-        val rawAuth = binding.xuperAuth.text.toString().trim()
         val rawUpdate = binding.updateUrl.text.toString().trim()
 
         val host = if (rawHost.isBlank()) null else normalizeUrl(rawHost, trailingSlash = true)
@@ -111,7 +109,6 @@ class PortalActivity : BaseActivity() {
                 portalCode = portalCode
             )
             session.savePlaylist(playlistUrl.orEmpty())
-            session.saveXuperAuth(rawAuth)
             session.saveUpdateUrl(updateUrl.orEmpty())
             // Si cambia la fuente de actualizaciones, descarta el APK anterior:
             // ya no sabemos si corresponde a la nueva version publicada.

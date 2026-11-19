@@ -9,6 +9,15 @@
 # Manifiesto de actualizaciones: se parsea por reflexion desde JSON.
 -keep class com.martinvidal.tv.data.repo.UpdateManifest { *; }
 
+# SDK nativo Ranger: el .so localiza estas clases y metodos por nombre JNI
+# (FindClass/GetMethodID), y Gson crea Status por reflexion. Ofuscarlos
+# romperia el callback OnPrepareEvent en la build release.
+-keep class com.titan.ranger.** { *; }
+-keep class zc.a { *; }
+
+# ijkplayer: metodos natives invocados por JNI desde las clases del JAR.
+-keep class tv.danmaku.ijk.media.player.** { *; }
+
 -keep,allowobfuscation @interface com.squareup.moshi.JsonClass
 -keepclassmembers,allowobfuscation class * {
     @com.squareup.moshi.Json <fields>;

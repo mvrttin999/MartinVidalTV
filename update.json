@@ -1,7 +1,7 @@
 {
-  "versionCode": 2,
-  "versionName": "1.1.0",
-  "apkUrl": "https://raw.githubusercontent.com/mvrttin999/MartinVidalTV/main/MartinVidalTV-1.1.0.apk",
-  "sha256": "78bbe71438ad1dbf2e5ccbfb70571bd4a0404eea17f73e38a027e0e72c561a3a",
-  "notes": "Nombres de canales reparados y catalogo dividido en 10 categorias."
+  "versionCode": 3,
+  "versionName": "1.2.0",
+  "apkUrl": "https://raw.githubusercontent.com/mvrttin999/MartinVidalTV/main/MartinVidalTV-1.2.0.apk",
+  "sha256": "7bdd41ce212c8d4ae704162f86f440316c1719c938d7a3e5f57c5d9a5448e532",
+  "notes": "Directos Xuper por SDK ranger: sin cuenta, sesion ni Content-Auth manual; 678 canales en 10 categorias."
 }

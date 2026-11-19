@@ -96,6 +96,8 @@ class DetailActivity : BaseActivity() {
                                 .putExtra(PlayerActivity.EXTRA_URL, playback.url)
                                 .putExtra(PlayerActivity.EXTRA_TITLE, state.title)
                                 .putExtra(PlayerActivity.EXTRA_IS_LIVE, playback.isLive)
+                                .putExtra(PlayerActivity.EXTRA_MEDIA_CODE, playback.mediaCode)
+                                .putExtra(PlayerActivity.EXTRA_PROGRAM, playback.programJson)
                         )
                     }
                 }

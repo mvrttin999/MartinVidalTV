@@ -1,5 +1,6 @@
 package com.martinvidal.tv.data.repo
 
+import android.net.Uri
 import com.martinvidal.tv.data.net.DeviceProfile
 import com.martinvidal.tv.data.net.PortalApi
 import com.martinvidal.tv.data.net.PortalRequest
@@ -10,7 +11,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Datos minimos que necesita el reproductor. */
-data class Playback(val url: String, val isLive: Boolean)
+data class Playback(
+    val url: String,
+    val isLive: Boolean,
+    /** Codigo `cyx_...` cuando el canal se reproduce via SDK ranger. */
+    val mediaCode: String? = null,
+    /** Program completo (con license) para PrepareProgram. */
+    val programJson: String? = null
+) {
+    val viaSdk: Boolean get() = mediaCode != null && programJson != null
+}
 
 /**
  * Resolucion de la URL de reproduccion.
@@ -37,7 +47,12 @@ class PlaybackRepository @Inject constructor(
     // probo el camino demo; el orden de calidades/CDN es una heuristica.
     suspend fun start(item: CardItem): Result<Playback> = runCatching {
         // Entrada de lista M3U: la direccion ya viene en la propia entrada.
+        // Si lleva xup-license, se reproduce por el SDK ranger (genera el
+        // Content-Auth internamente y sirve el stream por mem://).
         item.url?.takeIf { it.isNotBlank() }?.let { url ->
+            sdkProgram(url, item.title)?.let { (code, program) ->
+                return Result.success(Playback(url, true, code, program))
+            }
             return Result.success(Playback(url, item.kind.isLive()))
         }
 
@@ -78,6 +93,42 @@ class PlaybackRepository @Inject constructor(
         val data = envelope.dataObject(moshi) ?: error("El portal devolvió una respuesta vacía")
         val url = extractUrl(data) ?: error("El portal no devolvió una dirección de reproducción")
         Playback(url, isLive)
+    }
+
+    /**
+     * Construye el Program que espera PrepareProgram a partir de la license
+     * incrustada en la URL M3U (`?xup-license=...`). Devuelve el media_code y
+     * el JSON, o null si la entrada no es una licencia de Xuper.
+     */
+    private fun sdkProgram(url: String, title: String): Pair<String, String>? {
+        val encodedLicense = Uri.parse(url).getQueryParameter("xup-license")
+            ?.takeIf { it.isNotBlank() } ?: return null
+        val license = Uri.decode(encodedLicense)
+        val mediaCode = LICENSE_PARAM.findAll(license)
+            .firstOrNull { it.groupValues[1] == "media_code" }
+            ?.groupValues?.get(2) ?: return null
+        if (!mediaCode.startsWith("cyx")) return null
+
+        val media = org.json.JSONObject().apply {
+            put("format", "ts")
+            put("lang", "")
+            put("license", license)
+            put("name", mediaCode)
+            put("quality", "480p")
+            put("vcodec", "h264")
+        }
+        val program = org.json.JSONObject().apply {
+            put("buss", "live")
+            put("cause", "user")
+            put("episode", "-1")
+            put("from", "channellist")
+            put("media", mediaCode)
+            put("medias", org.json.JSONArray().put(media).put(media))
+            put("name", mediaCode)
+            put("start", 0)
+            put("title", title)
+        }
+        return mediaCode to program.toString()
     }
 
     private fun String?.isLive(): Boolean {
@@ -159,5 +210,9 @@ class PlaybackRepository @Inject constructor(
     private fun normalize(url: String): String {
         val trimmed = url.trim()
         return if (trimmed.startsWith("//")) "https:$trimmed" else trimmed
+    }
+
+    private companion object {
+        val LICENSE_PARAM = Regex("([a-z_]+)=([^&]+)")
     }
 }

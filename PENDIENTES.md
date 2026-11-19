@@ -5,7 +5,7 @@ cada punto lleva un identificador (`Pxx`) que también aparece en el código com
 `PENDIENTE(Pxx)` mientras siga abierto. Al terminarlo, se marca aquí y se quita
 (o se convierte en `HECHO(Pxx)`) el comentario del código.
 
-Última actualización: 2026-11-18 (P23–P30: lista incluida, reproductor, recarga de portada, auto-actualización, eliminación de cuenta/sesión/activación, análisis de `Xuper Tv NF.apk` y carga remota de lista M3U con caché)
+Última actualización: 2026-11-18 (P23–P32: lista incluida, reproductor, recarga de portada, auto-actualización, eliminación de cuenta/sesión/activación, análisis de `Xuper Tv NF.apk`, carga remota de lista M3U con caché y **P32: reproducción real de los directos por el SDK ranger, sin `Content-Auth` manual**)
 
 ---
 
@@ -400,6 +400,10 @@ headers"**: integrar los 677 canales con sus URLs reales del endpoint
 la app. Se descartó portar `libranger-jni.so` (la firma sigue sin derivarse y
 además exige sesión de cuenta).
 
+**Esto quedó superado por P32**: el SDK sí se portó y se comprobó que la `.so`
+no verifica firma/paquete, por lo que funciona bajo `com.martinvidal.tv.debug`
+sin derivar `sign2` ni mantener cuenta en la app.
+
 ### Lo que NO se puede hacer (límite verificado)
 
 El `Content-Auth` es **de un solo uso y con ventana de ~1 minuto**, generado por
@@ -514,3 +518,137 @@ Cambios:
 Entrega: `MartinVidalTV-1.1.0.apk`, 3524895 bytes, SHA-256 `78bbe71438ad1dbf2e5ccbfb70571bd4a0404eea17f73e38a027e0e72c561a3a`, versionCode 2.
 `update.json` apunta a ese APK con el mismo SHA, así que una instalación con
 v1.0.0 recibe la actualización automáticamente.
+
+
+### Análisis del `Content-Auth` de Xuper (2026-11-18) — P31
+
+Rastreado el auth en el APK de Xuper v4.35.0 (`com.android.mgstxNF`) y en
+`libranger-jni.so`. Conclusión: **no es reimplementable ni renovable sin una
+sesión real**, así que no hay vía para dejar los canales "estables" sin pegar un
+auth fresco.
+
+Hallazgos del código:
+
+- `api/portalCore/v9/getAuthInfo` (POST, cifrado `3des`, `ed/a.java:214`,
+  `kd/e2.java:706`) devuelve el entitlement (`hasPay`, `hasFreeAuth`,
+  `userIdentity`, días), no el string de reproducción. Requiere cuenta/sesión.
+- `api/portalCore/v4/startPlayLive` devuelve `LiveAddressList`; cada dirección
+  trae su `license` (las 506 licencias de `lista.m3u`).
+- El `Content-Auth` (`/live/?...&sign2_method=sign_o3&start_moment=...&sign2=`)
+  lo genera el SDK nativo Ranger. Llega a Java como String opaco en
+  `PlayInfo.auth` (`setAuth`, sin lógica encima). Los literales `sign2`,
+  `sign_o3`, `Content-Auth`, `start_moment=`, `auth_id` **no existen ni en los
+  DEX ni en el `.so`**: el argumento de `NativeJni.Call` va cifrado con
+  `ec.a.b(str2, ec.a.d())` y la librería ofuscada descifra, firma y devuelve el
+  JSON con `auth`/`license`.
+- `sign2` se calcula sobre `start_moment`, de ahí la ventana real de ~1 minuto
+  aunque `expired` marque ~4 h. Códigos ya verificados: replay inmediato 200,
+  mismo `sign2` a ~1 min 409, cambiar `start_moment` sin recalcular 401, sin
+  headers 410.
+
+Opciones evaluadas:
+
+1. Mantener pegar auth fresco desde Ajustes (lo único sin sesión; ventana corta).
+2. Portar el SDK Ranger + sesión invitado para pedir auth automáticamente:
+   contradice el requisito "sin sesión" y el SDK valida paquete/firma (bajo
+   `com.martinvidal.tv` fallaría).
+3. Cribar canales que respondan 200 sin `Content-Auth`: descartado de entrada,
+   sin headers da 410.
+
+ Sin cambios de código. Queda como P31 cerrado a efectos de viabilidad; si se
+ quiere avanzar, el siguiente paso útil es cribar empíricamente el catálogo para
+ medir cuántos canales responden sin firma.
+
+ **Superado por P32**: en lugar de pegar `Content-Auth`, se portó el SDK nativo
+ y se reproduce por `mem://` + `setSharedBuffer`, con el auth generado dentro
+ del propio SDK.
+
+---
+
+## P32 — Reproducción real de los directos por el SDK ranger (2026-11-18)
+
+**Hecho y verificado en emulador.** Los canales de Xuper se abren sin cuenta,
+sesión, activación ni `Content-Auth` pegado a mano.
+
+### Cómo se llegó
+
+- Se portó el SDK nativo como caja negra: `app/src/main/jniLibs/{arm64-v8a,
+  armeabi-v7a}/` con `libranger-jni.so`, `libc++_shared.so`, `libijkplayer.so`,
+  `libijkffmpeg.so`, `libijksdl.so`, más `app/libs/ijkplayer.jar` (70 clases ijk
+  extraídas del DEX real). La `.so` del objetivo **v4.35.0** (`versionCode
+  43500`) tiene SHA-256 `c377080c228d93edfd848f4af66cc947386f3199f91f40aaf40bbd80ec649a8d`.
+- Se recrearon las clases Java mínimas (`com.titan.ranger.NativeJni`,
+  `JniHandler`, `Status`, `RangerResult`, `b`, `zc.a`) y se confirmó con Frida
+  16.2.1 (attach como root, `Java.performNow`) que la `.so` **no valida
+  firma ni nombre de paquete**: corre bajo `com.martinvidal.tv.debug`.
+- La secuencia real, capturada de la app original, es:
+  `Init(work_path)` → `OnSystemEvent(net,wlan,start)` → `SetEnv(env+titan_port)`
+  → `SetEntries` → `SetPlayer(0/1,ijk,-1)` → `PrepareProgram(media_code,
+  program,live)` → `JniHandler.Callback(OnPrepareEvent, media_prepared)` con
+  `play_url=mem://127.0.0.1:<puerto>` y `media_buffer=<handle>` →
+  `OnPlayerOperation(setDataSource, data=mem://…)` → `prepare(Async)`.
+- El primer intento con la sonda no disparaba el callback. La causa raíz fue
+  que `assets/ranger/{env,entries,program}.json` estaban **caducados**. Con los
+  tres archivos refrescados desde la app 4.35.0, el nativo emitió
+  `media_prepared` e `IJK_RENDERING_START`.
+- **No se derivó `sign2`/`sign_o3`** y no hizo falta: el propio SDK genera el
+  `Content-Auth` y sirve el stream por el proxy local.
+
+### Integración en la app
+
+- `data/net/RangerBridge.kt`: singleton con un `PlayInfoServer` local en
+  `titan_port`, registro del callback **antes** de cargar `NativeJni.c()`,
+  secuencia de arranque y `prepare(mediaCode, programJson)` suspendido que
+  espera el `media_prepared`. Expone `onDataSourceOpened` y `onPrepareAsync`
+  para notificar al SDK desde el player.
+- `data/repo/PlaybackRepository.kt`: genera el `program.json` de cada canal
+  desde el parámetro `xup-license` de la M3U (`media_code`, licencia, `title`),
+  y marca la reproducción como `viaSdk`.
+- `ui/detail/DetailActivity.kt` pasa `media_code` y `program` a `PlayerActivity`.
+- `ui/player/PlayerActivity.kt`: para canales Xuper usa `IjkMediaPlayer` con
+  `setSharedBuffer(handle)` sobre el `mem://` (mismas opciones que `yc/a.java`
+  de la app real); para el resto mantiene Media3/OkHttp como fallback.
+- `XuperAuthInterceptor` ya no envía `Content-Auth`; se eliminaron
+  `assets/xuper_auth.txt`, el campo "Content-Auth" de Ajustes,
+  `SettingsStore.xuperAuth` y la actividad de sonda `RangerProbeActivity`.
+
+### Verificación
+
+- `./gradlew assembleDebug` sin errores; APK instalado en `emulator-5554`.
+- Flujo real por D-pad: Home → tarjeta → Reproducir. Primer canal
+  (`BALLY SPORTS KANSAS CITY HD`): `media_prepared code=cyx_456733780374153`,
+  `play_url=mem://127.0.0.1:38967`, `IJK_PREPARED`, `IJK_STARTED`,
+  `IJK_RENDERING_START`. Segundo canal (`BALLY SPORTS NORTH PLUS HD`):
+  `media_prepared code=cyx_95064435414374055`, mismo proxy local,
+  `IJK_PREPARED`/`RENDERING_START` en ~2 s.
+- Los `media_prepare_error err=101` posteriores son reintentos del SDK en
+  segundo plano; no afectan a la reproducción ya iniciada.
+- Los avisos `AMediaCodec buffer index -1` son idénticos a los de la app real en
+  el emulador; no son un fallo de esta integración.
+
+### Límite conocido
+
+`assets/ranger/env.json` y `entries.json` son una captura de la sesión de la
+app original y llevan tokens con `expired`. Mientras estén vigentes los canales
+abren; cuando caduquen habrá que refrescarlos desde un dispositivo controlado
+(repetir la captura Frida de `SetEnv`/`SetEntries`). `program.json` de
+`assets/ranger/` queda solo como referencia: en producción se genera por canal
+desde la M3U. Este es el único punto que depende de datos externos; la lógica
+de auth, firma y reproducción ya está dentro de la app.
+
+### v1.2.0 — entrega con SDK ranger (2026-11-18)
+
+- `versionCode` 3, `versionName` 1.2.0. Reglas R8 añadidas para conservar
+  `com.titan.ranger.**`, `zc.a` y `tv.danmaku.ijk.media.player.**`: sin ellas
+  el nativo no encuentra `JniHandler` por `FindClass`.
+- APK release firmado: `/home/mvrttin999/Descargas/MartinVidalTV-1.2.0.apk`,
+  16111965 bytes, SHA-256
+  `7bdd41ce212c8d4ae704162f86f440316c1719c938d7a3e5f57c5d9a5448e532`.
+  `apksigner verify`: v1 y v2 OK.
+- Verificado en emulador instalando con `--abi arm64-v8a` (las `.so` son ARM;
+  sin esa opción Android elige x86_64 y da `UnsatisfiedLinkError`). Flujo real
+  desde la portada hasta `IJK_PREPARED`/`IJK_RENDERING_START` en release.
+- `update.json` apunta a 1.2.0 con ese SHA. **Pendiente de publicar**: este
+  entorno no tiene `remote` de git ni token de GitHub (`gh` no está instalado),
+  así que no se hizo push. Al publicar hay que subir el APK y el manifiesto a
+  `main` y hacer commit/push del código.

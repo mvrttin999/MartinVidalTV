@@ -21,8 +21,8 @@ android {
         applicationId = "com.martinvidal.tv"
         minSdk = 21
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
 
         vectorDrawables.useSupportLibrary = true
         // Host del portal del distribuidor; se puede fijar al compilar con
@@ -113,6 +113,8 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
+    implementation(libs.gson)
+    implementation(files("libs/ijkplayer.jar"))
     implementation(libs.coil)
 
     implementation(libs.hilt.android)

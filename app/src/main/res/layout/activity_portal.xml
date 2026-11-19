@@ -147,39 +147,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="@string/portal_xuper_auth"
-                android:textColor="@color/text_primary"
-                android:textSize="13sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="@string/portal_xuper_auth_help"
-                android:textColor="@color/text_hint"
-                android:textSize="9sp" />
-
-            <EditText
-                android:id="@+id/xuperAuth"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_marginTop="3dp"
-                android:background="@drawable/bg_input"
-                android:gravity="center_vertical"
-                android:hint="@string/portal_xuper_auth_hint"
-                android:imeOptions="actionNext"
-                android:inputType="text"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:singleLine="true"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_hint"
-                android:textSize="12sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:text="@string/portal_update"
                 android:textColor="@color/text_primary"
                 android:textSize="13sp" />

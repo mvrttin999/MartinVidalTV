@@ -147,34 +147,37 @@ pública real (portada, búsqueda y reproducción HLS con segmentos `.ts`).
 ### Lista incluida: catálogo LIVE de Xuper
 
 Si no hay lista configurada, la app usa `app/src/main/assets/lista.m3u` con
-**677 canales en directo** extraídos del catálogo de Xuper v4.35.0 (auditado en
-emulador; ver P31). Cada entrada apunta a la URL real:
+**678 canales en directo** extraídos del catálogo de Xuper v4.35.0 (auditado en
+emulador; ver P31/P32), repartidos en 10 categorías. Cada entrada lleva su
+`Content-License` como parámetro `xup-license`, con el `media_code` del canal.
 
-```
-http://64.31.43.179:33984/live/<media_code>.m3u8?xup-license=<license>
-```
+Los directos se abren **sin cuenta, sesión, activación ni pegar ninguna
+cabecera**: el app porta el SDK nativo de Xuper (`libranger-jni.so` y las
+librerías ijk) y lo ejecuta internamente. La ruta real, verificada con Frida
+contra la app 4.35.0 y reproducida en MartinVidalTV, es:
 
-y lleva su `Content-License` como parámetro `xup-license`. El
-`XuperAuthInterceptor` lo convierte en cabecera y añade las demás cabeceras que
-exige el servidor (`Content-Auth`, `App`, `App-Version`, `Ranger-Id`,
-`User-Agent`, `X-Buffer`), tanto para el manifiesto como para los segmentos
-`.ts`.
+1. `NativeJni.c()` (singleton con `HandlerThread`) → `Init` → `OnSystemEvent`
+   `net/wlan/start` → `SetEnv` → `SetEntries` → `SetPlayer`.
+2. `PrepareProgram(media_code, program_json, "live")`, con el `program.json`
+   generado a partir de la licencia `xup-license` de cada canal.
+3. El nativo emite `JniHandler.Callback(OnPrepareEvent, media_prepared)` con
+   `play_url = mem://127.0.0.1:<puerto>` y `media_buffer` (handle del buffer
+   compartido). El SDK genera el `Content-Auth` internamente: Java/Kotlin nunca
+   lo ve ni lo envía.
+4. `PlayerActivity` crea un `IjkMediaPlayer`, llama a `setSharedBuffer(handle)`
+   y `setDataSource(mem://…)`, notifica al SDK con `OnPlayerOperation` y
+   reproduce. Las entradas que no son de Xuper siguen usando Media3/OkHttp.
 
-**Importante — validez de las cabeceras.** El `Content-Auth` de Xuper es de un
-solo uso y caduca en minutos: el incluido en `assets/xuper_auth.txt` ya no
-sirve. Para que los directos abren, pega en **Ajustes → Content-Auth de los
-directos** un valor capturado recién de la app original. Si se deja el campo
-vacío se usa el incluido (caducado). La app sigue sin cuenta, sesión ni
-activación propias: pegar una cabecera no inicia sesión en MartinVidalTV.
+`XuperAuthInterceptor` ya no envía `Content-Auth`; solo conserva las cabeceras
+residuales de dispositivo y `Content-License` para fuentes http. El campo de
+Ajustes para pegar el auth y `assets/xuper_auth.txt` se eliminaron.
 
-Verificado en emulador (2026-11-18): con un `Content-Auth` fresco pegado en
-Ajustes, `La Granja VIP 1 HD` reprodujo con el manifiesto y los segmentos
-devueltos como `200 OK` (sin `409`) y audio/vídeo activos. Sin esa cabecera
-vigente, el servidor responde `409`/`401`/`410` y la ficha muestra "El canal no
-responde ahora mismo", aunque las demás cabeceras estén correctas.
-
-Los 172 canales sin `Content-License` en el catálogo no pueden abrir; el resto
-sí con una cabecera vigente. Ver detalle y límites verificados en P31.
+Verificado en emulador (2026-11-18): dos canales seguidos (`BALLY SPORTS
+MIDWEST HD` y `BALLY SPORTS NORTH PLUS HD`) llegaron a `IJK_PREPARED`, `STARTED`
+y `MEDIA_INFO_VIDEO_RENDERING_START`, sin `Content-Auth` manual. La sesión del
+SDK se apoya en los archivos `assets/ranger/{env,entries}.json` capturados de la
+app original; sus tokens tienen caducidad, así que habrá que refrescarlos si
+dejan de funcionar (ver P32).
 
 ## Auto-actualización
 
@@ -194,7 +197,7 @@ https://raw.githubusercontent.com/mvrttin999/MartinVidalTV/main/update.json
 ```
 
 El `update.json` de la raíz del repo apunta al APK
-`MartinVidalTV-1.1.0.apk` publicado en el mismo repo; la app compara
+`MartinVidalTV-1.2.0.apk` publicado en el mismo repo; la app compara
 `versionCode`, descarga por HTTPS y valida el SHA-256 antes de ofrecer la
 instalación. El repositorio es público para que `raw.githubusercontent.com`
 sirva ambos archivos sin autenticación.
@@ -272,14 +275,15 @@ host guardado en `SettingsStore`.
 
 | Dato | Valor |
 |---|---|
-| APK | `MartinVidalTV-1.1.0.apk` |
+| APK | `MartinVidalTV-1.2.0.apk` |
 | Paquete | `com.martinvidal.tv` |
-| Versión | `1.1.0` (versionCode 2), `minSdk 21`, `targetSdk 34` |
-| Tamaño | 3524895 bytes (3.4 MiB) |
+| Versión | `1.2.0` (versionCode 3), `minSdk 21`, `targetSdk 34` |
+| Tamaño | 16111965 bytes (15.4 MiB; incluye las librerías del SDK) |
 | Firma | `CN=Martin Vidal, O=Martin Vidal TV, C=BR` (`martinvidal.jks`) |
-| SHA-256 del APK | `78bbe71438ad1dbf2e5ccbfb70571bd4a0404eea17f73e38a027e0e72c561a3a` |
+| SHA-256 del APK | `7bdd41ce212c8d4ae704162f86f440316c1719c938d7a3e5f57c5d9a5448e532` |
 | SHA-256 del certificado | `3192796cd3cd3eac7281412ae6be4cbd584da36fbe4479af1c5427e6c8df23f1` |
 
-Instalación: `adb install -r MartinVidalTV-1.1.0.apk`. Para actualizar sin
+Instalación: `adb install -r MartinVidalTV-1.2.0.apk`. En el emulador x86_64
+hay que forzar la ABI: `adb install -r -t --abi arm64-v8a …`. Para actualizar sin
 perder la firma hay que conservar `martinvidal.jks` y `keystore.properties`
 (no versionados).

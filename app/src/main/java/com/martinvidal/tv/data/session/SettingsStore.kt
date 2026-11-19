@@ -37,7 +37,6 @@ class SettingsStore @Inject constructor(
         val RESERVE1 = stringPreferencesKey("reserve1")
         val B29 = stringPreferencesKey("b29")
         val PLAYLIST_URL = stringPreferencesKey("playlist_url")
-        val XUPER_AUTH = stringPreferencesKey("xuper_auth")
         val UPDATE_URL = stringPreferencesKey("update_url")
         val UPDATE_VERSION = stringPreferencesKey("update_version")
         val UPDATE_NOTES = stringPreferencesKey("update_notes")
@@ -55,8 +54,6 @@ class SettingsStore @Inject constructor(
     val playlistUrl: Flow<String> = context.portalDataStore.data.map {
         effectivePlaylist(it[Keys.PLAYLIST_URL].orEmpty())
     }
-    /** Content-Auth capturado de Xuper; vacío usa el incluido en assets. */
-    val xuperAuth: Flow<String> = context.portalDataStore.data.map { it[Keys.XUPER_AUTH].orEmpty() }
     val updateUrl: Flow<String> = context.portalDataStore.data.map { it[Keys.UPDATE_URL].orEmpty() }
     val updateVersion: Flow<String> = context.portalDataStore.data.map { it[Keys.UPDATE_VERSION].orEmpty() }
 
@@ -72,7 +69,6 @@ class SettingsStore @Inject constructor(
             reserve1 = prefs[Keys.RESERVE1].orEmpty(),
             b29 = prefs[Keys.B29].orEmpty(),
             playlistUrl = effectivePlaylist(prefs[Keys.PLAYLIST_URL].orEmpty()),
-            xuperAuth = prefs[Keys.XUPER_AUTH].orEmpty(),
             updateUrl = prefs[Keys.UPDATE_URL].orEmpty(),
             updateVersion = prefs[Keys.UPDATE_VERSION].orEmpty(),
             updateNotes = prefs[Keys.UPDATE_NOTES].orEmpty(),
@@ -108,13 +104,6 @@ class SettingsStore @Inject constructor(
     suspend fun savePlaylist(url: String) {
         context.portalDataStore.edit {
             if (url.isBlank()) it.remove(Keys.PLAYLIST_URL) else it[Keys.PLAYLIST_URL] = url
-        }
-    }
-
-    /** Content-Auth de Xuper; vacío vuelve al valor incluido en assets. */
-    suspend fun saveXuperAuth(auth: String) {
-        context.portalDataStore.edit {
-            if (auth.isBlank()) it.remove(Keys.XUPER_AUTH) else it[Keys.XUPER_AUTH] = auth.trim()
         }
     }
 
@@ -156,7 +145,6 @@ class SettingsStore @Inject constructor(
         val reserve1: String = "",
         val b29: String = "",
         val playlistUrl: String = "",
-        val xuperAuth: String = "",
         val updateUrl: String = "",
         val updateVersion: String = "",
         val updateNotes: String = "",
